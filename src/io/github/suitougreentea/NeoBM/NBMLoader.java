@@ -92,7 +92,6 @@ class NBMLoaderPrivate {
         }
         r.close();
 
-        header.setTitle("テスト");
         d.setHeader(header);
 
         return d;
