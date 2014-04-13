@@ -1,0 +1,37 @@
+.doctype:"neobm"
+//ディス イズ コメント
+.header
+  title:"テスト"
+  subtitle:"(Sample Mix)"
+  artist:"サブは空"
+  subartist:""
+  genre:"♥"
+  //maxbpm:
+  //minbpm:
+  basebpm:120
+  resolution:480
+  
+  judge:@judgerank_easy
+  total:500
+  
+.end
+
+.resource
+  .sound
+    0:"a.wav"
+    1:"b.ogg"
+  .end
+  .image
+    0:"c.mpg"
+    1:"d.bmp"
+    2:"e.png"
+  .end
+.end
+
+.sequence
+  time:
+  tempo:
+  n:7,0  ,1
+  n:1,480,10
+  l:S,480,480,1,-1
+.end
