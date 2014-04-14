@@ -18,8 +18,8 @@
 
 .resource
   .sound
-    0:"a.wav"
-    1:"b.ogg"
+    0:   "a.wav"
+    128: "b.ogg"
   .end
   .image
     0:"c.mpg"

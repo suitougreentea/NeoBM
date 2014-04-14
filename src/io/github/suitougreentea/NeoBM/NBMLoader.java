@@ -5,7 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 public class NBMLoader {
@@ -84,6 +86,22 @@ class NBMLoaderPrivate {
                             level.push(LEVEL_IMAGE);
                         }else{
                             throw new NBMSyntaxError("Invalid syntax", r.getLineNumber());
+                        }
+                    }else if(level.peek() == LEVEL_SOUND) {
+                        String[] array = getTupleString(line);
+                        int id = getIntegerValue(array[0]);
+                        if(d.getSoundMap().containsKey(id)){
+                            throw new NBMSyntaxError("This id is already registered", r.getLineNumber());
+                        }else{
+                            d.getSoundMap().put(id, getStringValue(array[1]));
+                        }
+                    }else if(level.peek() == LEVEL_IMAGE) {
+                        String[] array = getTupleString(line);
+                        int id = getIntegerValue(array[0]);
+                        if(d.getImageMap().containsKey(id)){
+                            throw new NBMSyntaxError("This id is already registered", r.getLineNumber());
+                        }else{
+                            d.getImageMap().put(id, getStringValue(array[1]));
                         }
                     }
                 }

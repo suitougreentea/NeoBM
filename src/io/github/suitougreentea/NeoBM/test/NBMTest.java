@@ -32,6 +32,9 @@ public class NBMTest {
         assertEquals(d.getHeader().getArtist(), "サブは空");
         assertEquals(d.getHeader().getSubartist(), "");
         assertEquals(d.getHeader().getGenre(), "♥");
+
+        assertEquals(d.getSoundMap().get(128), "b.ogg");
+        assertEquals(d.getImageMap().get(2), "e.png");
     }
 
 
