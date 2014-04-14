@@ -39,7 +39,7 @@ public class AppPlayer {
 
             GL11.glPushMatrix();
             GL11.glTranslatef(10, 10, 0);
-            GLFont.drawString(String.format("%d",b-a));
+            GLFont.drawString("NEOBM PLAYER");
             GL11.glPopMatrix();
 
             a = b;
