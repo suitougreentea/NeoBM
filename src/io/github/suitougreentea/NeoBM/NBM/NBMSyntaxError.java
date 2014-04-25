@@ -1,4 +1,4 @@
-package io.github.suitougreentea.NeoBM;
+package io.github.suitougreentea.NeoBM.NBM;
 
 public class NBMSyntaxError extends Throwable {
     public NBMSyntaxError(String string, int lineNumber) {

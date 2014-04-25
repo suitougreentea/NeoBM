@@ -1,4 +1,9 @@
-package io.github.suitougreentea.NeoBM;
+package io.github.suitougreentea.NeoBM.NBM;
+
+import io.github.suitougreentea.NeoBM.NBM.sequence.Event;
+import io.github.suitougreentea.NeoBM.NBM.sequence.EventNote;
+import io.github.suitougreentea.NeoBM.NBM.sequence.EventTempo;
+import io.github.suitougreentea.NeoBM.NBM.sequence.EventTime;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -21,7 +26,6 @@ class NBMLoaderPrivate {
     LineNumberReader r;
 
     NBMData d;
-    NBMHeader header;
 
     Stack<Integer> level = new Stack<Integer>();
     private static final int LEVEL_HEADER = 1;
@@ -50,7 +54,15 @@ class NBMLoaderPrivate {
             throw new NBMSyntaxError("First line must be started with \".doctype\"", r.getLineNumber());
         }
         d = new NBMData(docType);
-        header = new NBMHeader();
+
+        long tick = 0;
+        float nowBPM = 0;
+        //int nowBeat = 0;
+        int nowBaseTick = 0;
+        int resolution = 0;
+
+        boolean definedTempo = false;
+        boolean definedTime = false;
 
         // 2+ line
         line = r.readLine();
@@ -74,11 +86,11 @@ class NBMLoaderPrivate {
                 }else{
                     if(level.peek() == LEVEL_HEADER){
                         String[] array = getTupleString(line);
-                        if(array[0].equals("title")) header.setTitle(getStringValue(array[1]));
-                        else if(array[0].equals("subtitle")) header.setSubtitle(getStringValue(array[1]));
-                        else if(array[0].equals("artist")) header.setArtist(getStringValue(array[1]));
-                        else if(array[0].equals("subartist")) header.setSubartist(getStringValue(array[1]));
-                        else if(array[0].equals("genre")) header.setGenre(getStringValue(array[1]));
+                        if(array[0].matches("((sub)?(title|artist)|genre)")) d.getHeaderMap().put(array[0], getStringValue(array[1]));
+                        else if(array[0].matches("(resolution)")){
+                            resolution = getIntegerValue(array[1]);
+                            d.getHeaderMap().put(array[0], resolution);
+                        }
                     }else if(level.peek() == LEVEL_RESOURCE) {
                         if(line.equals(".sound")){
                             level.push(LEVEL_SOUND);
@@ -103,6 +115,32 @@ class NBMLoaderPrivate {
                         }else{
                             d.getImageMap().put(id, getStringValue(array[1]));
                         }
+                    }else if(level.peek() == LEVEL_SEQUENCE) {
+                        String[] array = getEventTupleString(line);
+                        Event e = null;
+                        if(array[0].equals("n")){
+                            if(definedTime && definedTempo){
+                                String[] args = getArgumentsString(array[1], 2);
+                                e = new EventNote(getIntegerValue(args[0]), getIntegerValue(args[1]), tick);
+                            }else{
+                                throw new NBMSyntaxError("Tempo or time event is not defined", r.getLineNumber());
+                            }
+                        }else if(array[0].equals("time")){
+                            String[] args = getArgumentsString(array[1], 2);
+                            nowBaseTick = getIntegerValue(args[1]);
+                            e = new EventTime(getIntegerValue(args[0]), nowBaseTick, tick);
+                            definedTime = true;
+                            if(definedTime && definedTempo) addSpeedList(tick, nowBPM, nowBaseTick, resolution);
+                        }else if(array[0].equals("tempo")){
+                            String[] args = getArgumentsString(array[1], 1);
+                            nowBPM = getFloatValue(args[0]);
+                            e = new EventTempo(nowBPM, tick);
+                            definedTempo = true;
+                            if(definedTime && definedTempo) addSpeedList(tick, nowBPM, nowBaseTick, resolution);
+                        }
+                        int step = getIntegerValue(array[2]);
+                        tick += step;
+                        d.getSequence().add(e);
                     }
                 }
             }
@@ -110,9 +148,15 @@ class NBMLoaderPrivate {
         }
         r.close();
 
-        d.setHeader(header);
-
         return d;
+    }
+
+    private void addSpeedList(long tick, float nowBPM, int nowBaseTick, int resolution) {
+        d.getSpeedList().add(new NBMSpeedData(
+                tick,
+                (nowBPM * resolution * resolution) / (nowBaseTick * 60 * 1000),
+                (nowBaseTick * 60 * 1000) / (nowBPM * resolution * resolution)
+                ));
     }
 
     /**
@@ -127,6 +171,25 @@ class NBMLoaderPrivate {
         }else{
             return new String[]{line.substring(0, point).trim(), line.substring(point+1).trim()};
         }
+    }
+
+    public String[] getEventTupleString(String line) throws NBMSyntaxError{
+        int pointStart = line.indexOf(":");
+        int pointEnd = line.lastIndexOf(":");
+        if(pointStart == -1) throw new NBMSyntaxError("Missing \":\"", r.getLineNumber());
+        if(pointStart == pointEnd){
+            // EventWithoutArguments:<Step>
+            return new String[]{line.substring(0, pointStart).trim(), null, line.substring(pointStart+1).trim()};
+        }else{
+            // EventWithArguments:<Args>:<Step>
+            return new String[]{line.substring(0, pointStart).trim(), line.substring(pointStart+1, pointEnd).trim(), line.substring(pointEnd+1).trim()};
+        }
+    }
+
+    //TODO: 個数チェック / ""で囲まれた,の無視
+    public String[] getArgumentsString(String line, int requiredCounts) throws NBMSyntaxError{
+        if(line == null) throw new NBMSyntaxError(String.format("This event requires %d arguments", requiredCounts), r.getLineNumber());
+        return line.split(",");
     }
 
     public int getIntegerValue(String data) throws NBMSyntaxError {

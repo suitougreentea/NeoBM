@@ -10,6 +10,9 @@
   //minbpm:
   basebpm:120
   resolution:480
+  //soundlayers:1
+  //imagelayers:2
+  //missaction:[visible/play]
   
   judge:@judgerank_easy
   total:500
@@ -25,13 +28,21 @@
     0:"c.mpg"
     1:"d.bmp"
     2:"e.png"
+    //.defineclip 3
+      //
+      //
+    //.end
   .end
 .end
 
 .sequence
-  time:
-  tempo:
-  n:7,0  ,1
-  n:1,480,10
-  l:S,480,480,1,-1
+  time:4,4:0
+  tempo:320:1920
+  n:7,1:0
+  n:1,10:480
+  // movieclip
+  //m:~~~
+  // miss
+  //s:~~~
+  //l:S,480,1,-1:480
 .end

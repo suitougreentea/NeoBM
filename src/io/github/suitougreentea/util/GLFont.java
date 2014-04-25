@@ -62,7 +62,7 @@ public class GLFont {
         0xFFFF,
         B3 | BA,
         B0 | B1 | B2 | B5 | BE,
-        
+
         B0 | B1 | B2 | B6 | B9 | BB | BC | BE | BF,
         B5 | B6 | B8 | BA | BD,
         B0 | B1 | B2 | B5 | B7 | B8 | B9 | BD | BE | BF,
@@ -96,7 +96,7 @@ public class GLFont {
         B0 | B4 | BB | BE,
         B5 | B6,
         BE | BF,
-        
+
         // TODO: small letters
         B3,
         B5 | B6 | B8 | BA | BD,
