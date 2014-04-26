@@ -1,30 +1,38 @@
 package io.github.suitougreentea.NeoBM.NBM;
 
 public class NBMSpeedData {
-    long tick;
-    long time;
+    long eventTick;
+    long eventTime;
     float tickPerMilliSecond, milliSecondPerTick;
     //int stopGate;
 
     public NBMSpeedData(long tick, float tickPerMilliSecond, float milliSecondPerTick){
-        this.tick = tick;
+        this.eventTick = tick;
         this.tickPerMilliSecond = tickPerMilliSecond;
         this.milliSecondPerTick = milliSecondPerTick;
     }
 
-    public long getTime() {
-        return time;
+    public long getEventTime() {
+        return eventTime;
     }
-    public void setTime(long time) {
-        this.time = time;
+    public void setEventTime(long time) {
+        this.eventTime = time;
     }
-    public long getTick() {
-        return tick;
+    public long getEventTick() {
+        return eventTick;
     }
     public float getTickPerMilliSecond() {
         return tickPerMilliSecond;
     }
     public float getMilliSecondPerTick() {
         return milliSecondPerTick;
+    }
+
+    public float getTick(long time){
+        return eventTick + (time - eventTime) * tickPerMilliSecond;
+    }
+
+    public float getTime(long tick){
+        return eventTime + (tick - eventTick) * milliSecondPerTick;
     }
 }

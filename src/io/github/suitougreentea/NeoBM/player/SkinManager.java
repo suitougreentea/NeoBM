@@ -51,6 +51,5 @@ public class SkinManager {
         } catch (ScriptException e) {
             e.printStackTrace();
         }
-
     }
 }

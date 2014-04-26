@@ -1,20 +1,9 @@
 package io.github.suitougreentea.NeoBM.player;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
 import io.github.suitougreentea.NeoBM.NeoBM;
-import io.github.suitougreentea.NeoBM.NBM.NBMLoader;
-import io.github.suitougreentea.NeoBM.NBM.NBMSyntaxError;
+import io.github.suitougreentea.NeoBM.NBM.LoaderThread;
 import io.github.suitougreentea.NeoBM.player.state.StatePlayer;
 import io.github.suitougreentea.util.GLFont;
-import io.github.suitougreentea.util.Image;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
@@ -22,7 +11,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import org.newdawn.slick.opengl.renderer.Renderer;
 
 public class Game {
     private int targetFPS = 120;

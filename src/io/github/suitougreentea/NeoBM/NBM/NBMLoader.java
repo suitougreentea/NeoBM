@@ -22,7 +22,6 @@ public class NBMLoader {
 }
 
 class NBMLoaderPrivate {
-    //String path;
     LineNumberReader r;
 
     NBMData d;
@@ -38,7 +37,6 @@ class NBMLoaderPrivate {
     private static final int LEVEL_IMAGE = 8;
 
     public NBMLoaderPrivate(String path) throws FileNotFoundException{
-        //this.path = path;
         r = new LineNumberReader(new FileReader(path));
     }
 

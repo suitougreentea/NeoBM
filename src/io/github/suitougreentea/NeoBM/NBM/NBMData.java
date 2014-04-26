@@ -8,16 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 public class NBMData {
-    String docType;
-    Map<String, Object> headerMap = new HashMap<String, Object>();
-
-
-    //TODO: 初期化はコンストラクタの方がいいかな？
-    Map<Integer, String> soundMap = new HashMap<Integer, String>();
-    Map<Integer, String> imageMap = new HashMap<Integer, String>();
-    Map<String, Object> aliasMap = new HashMap<String, Object>();
-    List<Event> sequence = new ArrayList<Event>();
-    List<NBMSpeedData> speedList = new ArrayList<NBMSpeedData>();
+    private String docType;
+    private Map<String, Object> headerMap = new HashMap<String, Object>();
+    private Map<Integer, String> soundMap = new HashMap<Integer, String>();
+    private Map<Integer, String> imageMap = new HashMap<Integer, String>();
+    private Map<String, Object> aliasMap = new HashMap<String, Object>();
+    private List<Event> sequence = new ArrayList<Event>();
+    private List<NBMSpeedData> speedList = new ArrayList<NBMSpeedData>();
 
     public Map<Integer, String> getSoundMap() {
         return soundMap;
@@ -50,8 +47,4 @@ public class NBMData {
     public Map<String, Object> getHeaderMap() {
         return headerMap;
     }
-
-    //public void setHeaderMap( header){
-    //    this.header = header;
-    //}
 }
