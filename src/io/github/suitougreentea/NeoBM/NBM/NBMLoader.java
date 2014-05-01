@@ -1,32 +1,53 @@
 package io.github.suitougreentea.NeoBM.NBM;
 
 import io.github.suitougreentea.NeoBM.NBM.sequence.Event;
+import io.github.suitougreentea.NeoBM.NBM.sequence.EventLongNote;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventNote;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventTempo;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventTime;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+
+import org.newdawn.slick.openal.Audio;
+import org.newdawn.slick.openal.AudioLoader;
+import org.newdawn.slick.util.ResourceLoader;
 
 public class NBMLoader {
     public static NBMData loadNBM(String path) throws IOException, NBMSyntaxError {
         return new NBMLoaderPrivate(path).load();
     }
+
+    public static void loadSound(NBMData data) throws IOException {
+        Map<Integer, String> soundMap = data.getSoundMap();
+        Map<Integer, Audio> soundDataMap = data.getSoundDataMap();
+
+        for (Map.Entry<Integer, String> entry : soundMap.entrySet()){
+            int key = entry.getKey();
+            String path = entry.getValue();
+
+            Audio audio = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream(data.getParentPath() + "/" + path));
+            soundDataMap.put(key, audio);
+        }
+    }
 }
 
 class NBMLoaderPrivate {
-    LineNumberReader r;
+    private LineNumberReader r;
+    private String parentPath;
 
-    NBMData d;
+    private NBMData d;
 
-    Stack<Integer> level = new Stack<Integer>();
+    private Stack<Integer> level = new Stack<Integer>();
     private static final int LEVEL_HEADER = 1;
     private static final int LEVEL_RESOURCE = 2;
     private static final int LEVEL_SEQUENCE = 3;
@@ -38,6 +59,8 @@ class NBMLoaderPrivate {
 
     public NBMLoaderPrivate(String path) throws FileNotFoundException{
         r = new LineNumberReader(new FileReader(path));
+        File file = new File(path);
+        parentPath = file.getParent();
     }
 
     public NBMData load() throws IOException, NBMSyntaxError{
@@ -51,7 +74,7 @@ class NBMLoaderPrivate {
         }else{
             throw new NBMSyntaxError("First line must be started with \".doctype\"", r.getLineNumber());
         }
-        d = new NBMData(docType);
+        d = new NBMData(parentPath, docType);
 
         long tick = 0;
         float nowBPM = 0;
@@ -123,6 +146,13 @@ class NBMLoaderPrivate {
                             }else{
                                 throw new NBMSyntaxError("Tempo or time event is not defined", r.getLineNumber());
                             }
+                        }else if(array[0].equals("l")){
+                            if(definedTime && definedTempo){
+                                String[] args = getArgumentsString(array[1], 3);
+                                e = new EventLongNote(getIntegerValue(args[0]), getIntegerValue(args[1]), getIntegerValue(args[2]), tick);
+                            }else{
+                                throw new NBMSyntaxError("Tempo or time event is not defined", r.getLineNumber());
+                            }
                         }else if(array[0].equals("time")){
                             String[] args = getArgumentsString(array[1], 2);
                             nowBaseTick = getIntegerValue(args[1]);
@@ -153,7 +183,8 @@ class NBMLoaderPrivate {
         d.getSpeedList().add(new NBMSpeedData(
                 tick,
                 (nowBPM * resolution * resolution) / (nowBaseTick * 60 * 1000),
-                (nowBaseTick * 60 * 1000) / (nowBPM * resolution * resolution)
+                (nowBaseTick * 60 * 1000) / (nowBPM * resolution * resolution),
+                nowBaseTick
                 ));
     }
 

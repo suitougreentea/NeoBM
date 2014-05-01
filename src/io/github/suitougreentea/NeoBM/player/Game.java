@@ -13,9 +13,12 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 
 public class Game {
-    private int targetFPS = 120;
+    private int targetFPS = 60;
     private long currentFrameTime;
     private long lastFrameTime;
+    private long fpsStartTime = 0;
+    private int calculatingFPS = 0;
+    private int fps;
 
     private GameRenderer renderer;
 
@@ -38,6 +41,7 @@ public class Game {
         currentState.init();    //TODO
 
         lastFrameTime = getTime();
+        fpsStartTime = lastFrameTime;
 
         while (!Display.isCloseRequested()) {
             currentFrameTime = getTime();
@@ -55,6 +59,7 @@ public class Game {
 
             Display.update();
             if(targetFPS > 0) Display.sync(targetFPS);
+            updateFPS();
 
             lastFrameTime = currentFrameTime;
         }
@@ -121,5 +126,18 @@ public class Game {
 
     public GameRenderer getRenderer() {
         return renderer;
+    }
+
+    private void updateFPS(){
+        if(currentFrameTime - fpsStartTime > 1000){
+            fps = calculatingFPS;
+            calculatingFPS = 0;
+            fpsStartTime += 1000;
+        }
+        calculatingFPS++;
+    }
+
+    public int getFPS() {
+        return fps;
     }
 }

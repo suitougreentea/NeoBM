@@ -4,12 +4,14 @@ public class NBMSpeedData {
     long eventTick;
     long eventTime;
     float tickPerMilliSecond, milliSecondPerTick;
+    int baseTick;
     //int stopGate;
 
-    public NBMSpeedData(long tick, float tickPerMilliSecond, float milliSecondPerTick){
+    public NBMSpeedData(long tick, float tickPerMilliSecond, float milliSecondPerTick, int baseTick){
         this.eventTick = tick;
         this.tickPerMilliSecond = tickPerMilliSecond;
         this.milliSecondPerTick = milliSecondPerTick;
+        this.baseTick = baseTick;
     }
 
     public long getEventTime() {
@@ -34,5 +36,9 @@ public class NBMSpeedData {
 
     public float getTime(long tick){
         return eventTime + (tick - eventTick) * milliSecondPerTick;
+    }
+
+    public int getBaseTick(){
+        return baseTick;
     }
 }

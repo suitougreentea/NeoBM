@@ -18,6 +18,7 @@
 
 .resource
   .sound
+    1:"test.wav"
   .end
   .image
   .end

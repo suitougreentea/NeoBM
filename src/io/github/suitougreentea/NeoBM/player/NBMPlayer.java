@@ -31,12 +31,8 @@ public class NBMPlayer {
 
     private Set<EventNote> visibleNoteList = new HashSet<EventNote>();
 
-    private int ALPHA = 800;
+    private int ALPHA = 1000;
     private int preCursor;
-    private long preTime;
-    private float preBPM;
-    private int preBeat;
-    private int preBaseTick;
 
     /*
      * JUDGE 仕様
@@ -60,15 +56,16 @@ public class NBMPlayer {
     // (GREAT)
     private final int J_GR = 42;
     // (GOOD)
-    private final int J_GD = 84;
+    private final int J_GD = 150;
     // sound: active, judge: active (BAD)
-    private final int J_BD = 168;
+    private final int J_BD = 600;
     // sound: active, judge: active if note is PG/GR/GD (POOR)
     private final int J_PR_SLOW = 1000;
     // sound: active, judge: inactive
 
     private final int PLAYLANES = 8;
     private EventNote[] laneJudgeActiveNoteList = new EventNote[PLAYLANES];
+    private EventNote[] laneSoundActiveNoteList = new EventNote[PLAYLANES];
     private int[] laneLastJudge = new int[PLAYLANES];
 
 
@@ -76,13 +73,24 @@ public class NBMPlayer {
     public static final int JUDGE_FAST_POOR = 2;
     public static final int JUDGE_SLOW_POOR = 3;
     public static final int JUDGE_BAD = 4;
-    public static final int JUDGE_GOOD = 5;
-    public static final int JUDGE_GREAT = 6;
-    public static final int JUDGE_PGREAT = 7;
+    public static final int JUDGE_BAD_LN = 5;
+    public static final int JUDGE_GOOD = 6;
+    public static final int JUDGE_GREAT = 7;
+    public static final int JUDGE_PGREAT = 8;
+
+    // For Renderer
     private int showJudgeTimer = 0;
     private int lastJudgeState = 0;
     private int lastJudgeDelay = 0;
     private int combo = 0;
+
+    private float[] keyBeam = new float[PLAYLANES];
+    private float beatRate;
+
+    private float gauge = 22;
+    private int gaugeType;
+    private float[] gaugeDelta = new float[]{0,-6f,-2f,-2f,-2f,-2f,100/8,200/8,200/8};
+    public static final int GAUGE_NORMAL = 0;
 
     public int getShowJudgeTimer(){
         return showJudgeTimer;
@@ -102,7 +110,27 @@ public class NBMPlayer {
         return combo;
     }
 
+    public float[] getKeyBeam(){
+        return keyBeam;
+    }
+
+    public float getBeatRate(){
+        return beatRate;
+    }
+
+    public int getCalculatedGauge(){
+        return (int) (Math.floor(gauge/2)*2);
+    }
+
+    public int getGaugeType(){
+        return gaugeType;
+    }
+
     public void setJudge(int judgeState, int delay){
+        gauge += gaugeDelta[judgeState];
+        if(gauge > 100f) gauge = 100f;
+        if(gauge < 2f) gauge = 2f;
+
         if(judgeState == JUDGE_BAD || judgeState == JUDGE_MISS_POOR){
             combo = 0;
         }else if(judgeState == JUDGE_GOOD || judgeState == JUDGE_GREAT || judgeState == JUDGE_PGREAT){
@@ -119,7 +147,7 @@ public class NBMPlayer {
     }
 
     public void start(){
-        while(data.getSequence().get(cursor).getTick() == 0){
+        /*while(data.getSequence().get(cursor).getTick() == 0){
             Event e = data.getSequence().get(cursor);
             if(e instanceof EventTime){
                 nowBeat = ((EventTime) e).getBeat();
@@ -128,12 +156,13 @@ public class NBMPlayer {
                 nowBPM = ((EventTempo) e).getTempo();
             }
             cursor++;
-        }
+        }*/
         calculateTime(0, 0);
         startTime = game.getCurrentFrameTime();
     }
 
     public void eachFrame(){
+        long elapsedTime = game.getCurrentFrameTime() - startTime;
         if(tick == -2){
             loader = new LoaderThread(path);
             loader.start();
@@ -148,8 +177,8 @@ public class NBMPlayer {
                 NeoBM.logger.info(String.valueOf(progress));
             }
         }else{
-            long elapsedTime = game.getCurrentFrameTime() - startTime;
-            NBMSpeedData speed = nextFromTime(elapsedTime);
+
+            NBMSpeedData speed = getFromTime(elapsedTime);
             tick = speed.getTick(elapsedTime);
 
             // 現在のtickのリアルタイム処理
@@ -159,7 +188,7 @@ public class NBMPlayer {
             }*/
 
             // 予測(PreCursor)
-            while(data.getSequence().get(preCursor).getTick() <= tick + ALPHA + 240 /* || JUDGESTART */){
+            while(preCursor < data.getSequence().size() && data.getSequence().get(preCursor).getTick() <= tick + ALPHA + 240 /* || JUDGESTART */){
                 Event e = data.getSequence().get(preCursor);
                 if(e instanceof EventNote) {
                     // 可視ノートの一覧に追加
@@ -179,7 +208,12 @@ public class NBMPlayer {
                     if(pos>1)pos=1;
                     e.setPosition(pos);
 
-                    // ノートをアクティブ(キー音鳴る)にする
+                    if(e instanceof EventLongNote){
+                        float endpos = ((tick - (e.getTick()+((EventLongNote)e).getGate()))/(ALPHA))+1;
+                        ((EventLongNote)e).setEndPosition(endpos);
+                    }
+
+                    // ノートをアクティブ(判定対象)にする
                     int lane = e.getLane();
 
                     if(s.getTime(e.getTick()) - J_PR_FAST <= elapsedTime && laneJudgeActiveNoteList[lane] == null){
@@ -194,6 +228,9 @@ public class NBMPlayer {
                             // 次のノートがBAD範囲内 かつ 前のノートがすでに不可視(つまり、一度判定された)
                             laneJudgeActiveNoteList[lane] = e;
                             laneLastJudge[lane] = 0;
+                        }else if(e.getTick() < laneJudgeActiveNoteList[lane].getTick()){
+                            // 先に次のノートが判定リストに加えられてしまっていて、後から前のノートが出てきた場合 (visibleNoteListは順番通りになっていないため)
+                            laneJudgeActiveNoteList[lane] = e;
                         }
                     }
                 }
@@ -208,6 +245,7 @@ public class NBMPlayer {
                     if(s.getTime(e.getTick()) + J_PR_SLOW < elapsedTime){
                         // 遅POORラインより後になった場合
                         laneJudgeActiveNoteList[lane] = null;
+                        visibleNoteList.remove(e);
                     }else if(s.getTime(e.getTick()) + J_BD < elapsedTime && visibleNoteList.contains(e)){
                         // 遅POORエリアにおいて、ノートが判定されなかった場合、(見逃しPOOR)
                         setJudge(JUDGE_MISS_POOR, 0);
@@ -246,12 +284,24 @@ public class NBMPlayer {
                                 //すでに判定された (遅POOR)
                                 setJudge(JUDGE_SLOW_POOR, delay);
                             }
+                            //data.getSoundDataMap().get(1).stop();
+                            //data.getSoundDataMap().get(1).playAsSoundEffect(1f,1f,false);
                         }
                     }
                 }
             }
 
-            if(showJudgeTimer % 1000 == 0) showJudgeTimer = 0; else showJudgeTimer++;
+            if(showJudgeTimer != 0) showJudgeTimer += game.getDelta();
+            if(showJudgeTimer > 1000) showJudgeTimer = 0;
+
+            beatRate = getBeatRate((long) tick);
+        }
+
+        for(int i=0;i<PLAYLANES;i++){
+            if(game.getInputState()[i] >= 2) keyBeam[i] += game.getDelta() / 50f;
+            else keyBeam[i] -= game.getDelta() / 150f;
+            if(keyBeam[i] > 1f) keyBeam[i] = 1f;
+            else if(keyBeam[i] < 0f) keyBeam[i] = 0f;
         }
 
         //System.out.println(String.format("%.10f",tick));
@@ -269,17 +319,9 @@ public class NBMPlayer {
     }
 
     // data.speedList周り
-    int speedListCursor = 0;
-    public NBMSpeedData nextFromTime(long nowTime){
-        while(speedListCursor < data.getSpeedList().size() - 1){
-            if(data.getSpeedList().get(speedListCursor + 1).getEventTime() < nowTime) speedListCursor++;
-            else break;
-        }
-        return data.getSpeedList().get(speedListCursor);
-    }
 
     public NBMSpeedData getFromTime(long time){
-        int i = speedListCursor;
+        int i = 0;
         while(i < data.getSpeedList().size() - 1){
             if(data.getSpeedList().get(i + 1).getEventTime() < time) i++;
             else break;
@@ -287,16 +329,8 @@ public class NBMPlayer {
         return data.getSpeedList().get(i);
     }
 
-    public NBMSpeedData nextFromTick(long nowTick){
-        while(speedListCursor < data.getSpeedList().size() - 1){
-            if(data.getSpeedList().get(speedListCursor + 1).getEventTick() < nowTick) speedListCursor++;
-            else break;
-        }
-        return data.getSpeedList().get(speedListCursor);
-    }
-
     public NBMSpeedData getFromTick(long tick){
-        int i = speedListCursor;
+        int i = 0;
         while(i < data.getSpeedList().size() - 1){
             if(data.getSpeedList().get(i + 1).getEventTick() < tick) i++;
             else break;
@@ -307,7 +341,7 @@ public class NBMPlayer {
     public void calculateTime(long nowTime, long nowTick){
         long tick = nowTick;
         long time = nowTime;
-        int i = speedListCursor;
+        int i = 0;
         while(i < data.getSpeedList().size() - 1){
             //System.out.println(data.getSpeedList().get(i).getTime());
             data.getSpeedList().get(i + 1).setEventTime(Math.round(time + (data.getSpeedList().get(i + 1).getEventTick() - tick) * data.getSpeedList().get(i).getMilliSecondPerTick()));
@@ -317,4 +351,13 @@ public class NBMPlayer {
         }
     }
 
+    public float getBeatRate(long tick){
+        int i = 0;
+        while(i < data.getSpeedList().size() - 1){
+            if(data.getSpeedList().get(i + 1).getEventTick() < tick) i++;
+            else break;
+        }
+        NBMSpeedData speed = data.getSpeedList().get(i);
+        return ((tick - speed.getEventTick()) % speed.getBaseTick()) / ((float)(speed.getBaseTick()));
+    }
 }

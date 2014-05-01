@@ -11,12 +11,14 @@ import io.github.suitougreentea.util.Image;
 import static org.lwjgl.opengl.GL11.*;
 
 public class GameRenderer {
+    private Game game;
 
     private int canvasWidth, canvasHeight;
 
     private float r = 1, g = 1, b = 1, a = 1;
 
     public GameRenderer(Game game){
+        this.game = game;
     }
 
     public void drawImage(Image image, float dx, float dy){
@@ -61,6 +63,12 @@ public class GameRenderer {
         glTranslatef(1, 1, 0);
         bindNone();
         GLFont.drawString(NeoBM.getFullVersion());
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(1, 16, 0);
+        bindNone();
+        GLFont.drawString(String.valueOf(game.getFPS()));
         glPopMatrix();
     }
 

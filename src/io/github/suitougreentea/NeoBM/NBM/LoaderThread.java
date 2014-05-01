@@ -15,6 +15,8 @@ public class LoaderThread extends Thread {
     public void run(){
         try {
             result = NBMLoader.loadNBM(path);
+            this.progress = 0.2f;
+            NBMLoader.loadSound(result);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (NBMSyntaxError e) {
