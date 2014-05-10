@@ -66,7 +66,7 @@ public class NBMPlayer {
     private EventNote[] laneSoundActiveNoteList = new EventNote[PLAYLANES];
     private int[] laneLastJudge = new int[PLAYLANES];
 
-    private boolean oldLongNote = false;
+    private boolean chargeNote = false;
 
     public static final int JUDGE_MISS_POOR = 1;
     public static final int JUDGE_FAST_POOR = 2;
@@ -88,7 +88,7 @@ public class NBMPlayer {
 
     private float gauge = 22;
     private int gaugeType;
-    private float[] gaugeDelta = new float[]{0,-6f,-2f,-2f,-2f,-2f,100/8,200/8,200/8};
+    private float[] gaugeDelta;// = new float[]{0,-6f,-2f,-2f,-2f,-2f,100/8,200/8,200/8};
     public static final int GAUGE_NORMAL = 0;
 
     public int getShowJudgeTimer(){
@@ -170,13 +170,21 @@ public class NBMPlayer {
             float progress = loader.getProgress();
             if(progress == 1.0f){
                 this.data = loader.getResult();
+
+                // initialize
+                chargeNote = (boolean) data.getHeaderMap().get("chargenote");
+
+                int totalNotes = (int) data.getHeaderMap().get("notes");
+                float total = (float) data.getHeaderMap().get("total");
+                float a = total / totalNotes;
+                gaugeDelta = new float[]{0,-6f,-2f,-2f,-2f,-2f,a/2,a,a};
+
                 start();
                 tick = 0;
             }else{
                 NeoBM.logger.info(String.valueOf(progress));
             }
         }else{
-
             NBMSpeedData speed = getFromTime(elapsedTime);
             tick = speed.getTick(elapsedTime);
 
@@ -273,77 +281,7 @@ public class NBMPlayer {
                             e.setJudged(true);
                             laneJudgeActiveNoteList[lane] = null;
                         }else{
-                            if(oldLongNote){
-                                // LR2式ロングノート (先頭判定のみ)
-                                if(((EventLongNote) e).isActive()){
-                                    // アクティブ (おしっぱ状態)
-                                    if(es.getTime(endTick) < elapsedTime){
-                                        // 終端まで来た
-                                        int startDelay = laneLastJudge[lane];
-                                        // 頭の判定
-                                        if(-J_PG <= startDelay && startDelay <= J_PG){
-                                            setJudge(JUDGE_PGREAT, startDelay);
-                                        }else if(-J_GR <= startDelay && startDelay <= J_GR){
-                                            setJudge(JUDGE_GREAT, startDelay);
-                                        }else if(-J_GD <= startDelay && startDelay <= J_GD){
-                                            setJudge(JUDGE_GOOD, startDelay);
-                                        }
-                                        ((EventLongNote) e).setActive(false);
-                                        e.setJudged(true);
-                                    }
-                                    if(game.getInputState()[lane] == 1){
-                                        int delay = Math.round(elapsedTime - es.getTime(endTick));
-                                        int startDelay = laneLastJudge[lane];
-                                        if(-J_GD <= delay){
-                                            // 離すタイミングが早すぎない
-                                            // 頭の判定
-                                            if(-J_PG <= startDelay && startDelay <= J_PG){
-                                                setJudge(JUDGE_PGREAT, startDelay);
-                                            }else if(-J_GR <= startDelay && startDelay <= J_GR){
-                                                setJudge(JUDGE_GREAT, startDelay);
-                                            }else if(-J_GD <= startDelay && startDelay <= J_GD){
-                                                setJudge(JUDGE_GOOD, startDelay);
-                                            }
-                                        }else{
-                                            // 離すタイミングがダメ (早すぎ)
-                                            setJudge(JUDGE_BAD, delay);
-                                            laneJudgeActiveNoteList[lane] = null;
-                                        }
-                                        ((EventLongNote) e).setActive(false);
-                                        e.setJudged(true);
-                                    }
-                                }else if(!e.isJudged()){
-                                    if(game.getInputState()[lane] == 2){
-                                        int delay = Math.round(elapsedTime - s.getTime(e.getTick()));
-                                        System.out.println(String.format("%d", delay));
-                                        //まだノートが判定されていない
-                                        if(delay < -J_BD){
-                                            //早POOR
-                                            setJudge(JUDGE_FAST_POOR, delay);
-                                        }else{
-                                            //BAD以降
-                                            laneLastJudge[lane] = delay;
-                                            if(-J_PG <= delay && delay <= J_PG){
-                                                ((EventLongNote) e).setActive(true);
-                                            }else if(-J_GR <= delay && delay <= J_GR){
-                                                ((EventLongNote) e).setActive(true);
-                                            }else if(-J_GD <= delay && delay <= J_GD){
-                                                ((EventLongNote) e).setActive(true);
-                                            }else{
-                                                setJudge(JUDGE_BAD, delay);
-                                                e.setJudged(true);
-                                                laneJudgeActiveNoteList[lane] = null; 
-                                            }
-                                        }
-                                    }
-                                }else{
-                                    if(game.getInputState()[lane] == 2){
-                                        //すでに判定された (遅POOR)
-                                        int delay = Math.round(elapsedTime - s.getTime(e.getTick()));
-                                        setJudge(JUDGE_SLOW_POOR, delay);
-                                    }
-                                }
-                            }else{
+                            if(chargeNote){
                                 // チャージ式ロングノート (2点判定)
                                 if(((EventLongNote) e).isActive()){
                                     // アクティブ (おしっぱ状態)
@@ -389,6 +327,75 @@ public class NBMPlayer {
                                                 ((EventLongNote) e).setActive(true);
                                             }else if(-J_GD <= delay && delay <= J_GD){
                                                 setJudge(JUDGE_GOOD, delay);
+                                                ((EventLongNote) e).setActive(true);
+                                            }else{
+                                                setJudge(JUDGE_BAD, delay);
+                                                e.setJudged(true);
+                                                laneJudgeActiveNoteList[lane] = null; 
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    if(game.getInputState()[lane] == 2){
+                                        //すでに判定された (遅POOR)
+                                        int delay = Math.round(elapsedTime - s.getTime(e.getTick()));
+                                        setJudge(JUDGE_SLOW_POOR, delay);
+                                    }
+                                }
+                            }else{
+                                // LR2式ロングノート (先頭判定のみ)
+                                if(((EventLongNote) e).isActive()){
+                                    // アクティブ (おしっぱ状態)
+                                    if(es.getTime(endTick) < elapsedTime){
+                                        // 終端まで来た
+                                        int startDelay = laneLastJudge[lane];
+                                        // 頭の判定
+                                        if(-J_PG <= startDelay && startDelay <= J_PG){
+                                            setJudge(JUDGE_PGREAT, startDelay);
+                                        }else if(-J_GR <= startDelay && startDelay <= J_GR){
+                                            setJudge(JUDGE_GREAT, startDelay);
+                                        }else if(-J_GD <= startDelay && startDelay <= J_GD){
+                                            setJudge(JUDGE_GOOD, startDelay);
+                                        }
+                                        ((EventLongNote) e).setActive(false);
+                                        e.setJudged(true);
+                                    }else if(game.getInputState()[lane] == 1){
+                                        int delay = Math.round(elapsedTime - es.getTime(endTick));
+                                        int startDelay = laneLastJudge[lane];
+                                        if(-J_GD <= delay){
+                                            // 離すタイミングが早すぎない
+                                            // 頭の判定
+                                            if(-J_PG <= startDelay && startDelay <= J_PG){
+                                                setJudge(JUDGE_PGREAT, startDelay);
+                                            }else if(-J_GR <= startDelay && startDelay <= J_GR){
+                                                setJudge(JUDGE_GREAT, startDelay);
+                                            }else if(-J_GD <= startDelay && startDelay <= J_GD){
+                                                setJudge(JUDGE_GOOD, startDelay);
+                                            }
+                                        }else{
+                                            // 離すタイミングがダメ (早すぎ)
+                                            setJudge(JUDGE_BAD, delay);
+                                            laneJudgeActiveNoteList[lane] = null;
+                                        }
+                                        ((EventLongNote) e).setActive(false);
+                                        e.setJudged(true);
+                                    }
+                                }else if(!e.isJudged()){
+                                    if(game.getInputState()[lane] == 2){
+                                        int delay = Math.round(elapsedTime - s.getTime(e.getTick()));
+                                        System.out.println(String.format("%d", delay));
+                                        //まだノートが判定されていない
+                                        if(delay < -J_BD){
+                                            //早POOR
+                                            setJudge(JUDGE_FAST_POOR, delay);
+                                        }else{
+                                            //BAD以降
+                                            laneLastJudge[lane] = delay;
+                                            if(-J_PG <= delay && delay <= J_PG){
+                                                ((EventLongNote) e).setActive(true);
+                                            }else if(-J_GR <= delay && delay <= J_GR){
+                                                ((EventLongNote) e).setActive(true);
+                                            }else if(-J_GD <= delay && delay <= J_GD){
                                                 ((EventLongNote) e).setActive(true);
                                             }else{
                                                 setJudge(JUDGE_BAD, delay);

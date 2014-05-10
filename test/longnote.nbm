@@ -1,19 +1,19 @@
 .doctype:"neobm"
-//ディス イズ コメント
+
 .header
-  title:"テスト"
-  subtitle:"(Sample Mix)"
-  artist:"サブは空"
+  title:"Long Note Test"
+  subtitle:""
+  artist:""
   subartist:""
-  genre:"♥"
+  genre:"Test"
   //maxbpm:
   //minbpm:
   basebpm:120
   resolution:480
   
   judge:@judgerank_easy
-  total:500
-  
+  total:260
+  chargenote:true
 .end
 
 .resource

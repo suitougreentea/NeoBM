@@ -82,6 +82,8 @@ class NBMLoaderPrivate {
         //int nowBeat = 0;
         int nowBaseTick = 0;
         int resolution = 0;
+        int totalNotes = 0;
+        boolean chargeNote = false;
 
         boolean definedTempo = false;
         boolean definedTime = false;
@@ -109,9 +111,15 @@ class NBMLoaderPrivate {
                     if(level.peek() == LEVEL_HEADER){
                         String[] array = getTupleString(line);
                         if(array[0].matches("((sub)?(title|artist)|genre)")) d.getHeaderMap().put(array[0], getStringValue(array[1]));
-                        else if(array[0].matches("(resolution)")){
+                        else if(array[0].matches("(INTEGERPROPERTY)")) d.getHeaderMap().put(array[0], getIntegerValue(array[1]));
+                        else if(array[0].matches("(total)")) d.getHeaderMap().put(array[0], getFloatValue(array[1]));
+                        else if(array[0].matches("(BOOLEANPROPERTY)")) d.getHeaderMap().put(array[0], getBooleanValue(array[1]));
+                        else if(array[0].matches("chargenote")){
+                            chargeNote = getBooleanValue(array[1]);
+                        }
+                        else if(array[0].matches("resolution")){
                             resolution = getIntegerValue(array[1]);
-                            d.getHeaderMap().put(array[0], resolution);
+                            d.getHeaderMap().put("resolution", resolution);
                         }
                     }else if(level.peek() == LEVEL_RESOURCE) {
                         if(line.equals(".sound")){
@@ -144,6 +152,7 @@ class NBMLoaderPrivate {
                             if(definedTime && definedTempo){
                                 String[] args = getArgumentsString(array[1], 2);
                                 e = new EventNote(getIntegerValue(args[0]), getIntegerValue(args[1]), tick);
+                                totalNotes++;
                             }else{
                                 throw new NBMSyntaxError("Tempo or time event is not defined", r.getLineNumber());
                             }
@@ -151,6 +160,8 @@ class NBMLoaderPrivate {
                             if(definedTime && definedTempo){
                                 String[] args = getArgumentsString(array[1], 3);
                                 e = new EventLongNote(getIntegerValue(args[0]), getIntegerValue(args[1]), getIntegerValue(args[2]), tick);
+                                totalNotes++;
+                                if(chargeNote) totalNotes++;
                             }else{
                                 throw new NBMSyntaxError("Tempo or time event is not defined", r.getLineNumber());
                             }
@@ -183,6 +194,14 @@ class NBMLoaderPrivate {
             line = r.readLine();
         }
         r.close();
+
+        if(d.getHeaderMap().get("total") == null){
+            float total = 7.605f*totalNotes/(0.01f*totalNotes+6.5f);
+            if(total < 260) total=260;
+            d.getHeaderMap().put("total",total);
+        }
+        d.getHeaderMap().put("notes", totalNotes);
+        d.getHeaderMap().put("chargenote", chargeNote);
 
         return d;
     }
@@ -242,5 +261,10 @@ class NBMLoaderPrivate {
     public String getStringValue(String data) throws NBMSyntaxError {
         if(!data.matches("\".*\"")) throw new NBMSyntaxError("Property must be string", r.getLineNumber());
         return data.substring(1, data.length()-1);
+    }
+
+    public boolean getBooleanValue(String data) throws NBMSyntaxError {
+        if(!data.matches("(true|false)")) throw new NBMSyntaxError("Property must be (true/false)", r.getLineNumber());
+        return Boolean.valueOf(data);
     }
 }
