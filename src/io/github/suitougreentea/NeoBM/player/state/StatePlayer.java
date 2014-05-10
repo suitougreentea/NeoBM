@@ -29,7 +29,7 @@ public class StatePlayer {
         skin = new SkinManager(this, game, game.getRenderer());
         skin.init();
 
-        player = new NBMPlayer(game, "test/rhythmtest.nbm");
+        player = new NBMPlayer(game, "test/backspin.nbm");
     }
 
     public void enter(){

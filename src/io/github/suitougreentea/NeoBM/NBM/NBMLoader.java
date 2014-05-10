@@ -2,6 +2,7 @@ package io.github.suitougreentea.NeoBM.NBM;
 
 import io.github.suitougreentea.NeoBM.NBM.sequence.Event;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventLongNote;
+import io.github.suitougreentea.NeoBM.NBM.sequence.EventLongNoteBackSpin;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventNote;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventSound;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventTempo;
@@ -161,6 +162,14 @@ class NBMLoaderPrivate {
                             }else{
                                 throw new NBMSyntaxError("Tempo or time event is not defined", r.getLineNumber());
                             }
+                        }else if(array[0].equals("lb")){
+                            if(definedTime && definedTempo){
+                                String[] args = getArgumentsString(array[1], 4);
+                                e = new EventLongNoteBackSpin(getIntegerValue(args[0]), getIntegerValue(args[1]), getIntegerValue(args[2]), getIntegerValue(args[3]), tick);
+                                totalNotes += 2;
+                            }else{
+                                throw new NBMSyntaxError("Tempo or time event is not defined", r.getLineNumber());
+                            }
                         }else if(array[0].equals("s")){
                             if(definedTime && definedTempo){
                                 String[] args = getArgumentsString(array[1], 2);
@@ -180,6 +189,8 @@ class NBMLoaderPrivate {
                             e = new EventTempo(nowBPM, tick);
                             definedTempo = true;
                             if(definedTime && definedTempo) addSpeedList(tick, nowBPM, nowBaseTick, resolution);
+                        }else{
+                            throw new NBMSyntaxError("Unknown event", r.getLineNumber());
                         }
                         int step = getIntegerValue(array[2]);
                         tick += step;
