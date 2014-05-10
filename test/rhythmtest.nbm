@@ -18,7 +18,9 @@
 
 .resource
   .sound
-    1:"test.wav"
+    1:"bd.wav"
+    2:"pn1.wav"
+    3:"pn2.wav"    
   .end
   .image
   .end
@@ -27,7 +29,7 @@
 .sequence
   time:4,480:0
   tempo:120:1920
-  n:1,1:0
+  n:1,2:0
   n:0,1:480
   n:0,1:480
   n:1,1:480
@@ -44,7 +46,7 @@
   n:0,1:480
   //
   tempo:240:0
-  n:6,1:0
+  n:6,3:0
   n:0,1:480
   n:0,1:480
   n:0,1:480

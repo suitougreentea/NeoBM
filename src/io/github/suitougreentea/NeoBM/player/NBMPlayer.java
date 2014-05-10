@@ -1,9 +1,7 @@
 package io.github.suitougreentea.NeoBM.player;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import io.github.suitougreentea.NeoBM.NeoBM;
@@ -223,6 +221,7 @@ public class NBMPlayer {
                 if(s.getTime(e.getTick()) - J_PR_FAST <= elapsedTime && laneJudgeActiveNoteList[lane] == null && !e.isJudged()){
                     // 前のノートがアクティブでない (早POORがありえる)
                     laneJudgeActiveNoteList[lane] = e;
+                    laneSoundActiveNoteList[lane] = e;
                     laneLastJudge[lane] = 0;
                 }else if(laneJudgeActiveNoteList[lane] == null){
                     // まだ範囲内でない
@@ -233,16 +232,19 @@ public class NBMPlayer {
                             if(!((EventLongNote) e).isActive()){
                                 // 次のノートがBAD範囲内 かつ前のノートが判定された
                                 laneJudgeActiveNoteList[lane] = e;
+                                laneSoundActiveNoteList[lane] = e;
                                 laneLastJudge[lane] = 0;
                             }
                         }else{
                             // 次のノートがBAD範囲内 かつ前のノートが判定された
                             laneJudgeActiveNoteList[lane] = e;
+                            laneSoundActiveNoteList[lane] = e;
                             laneLastJudge[lane] = 0;
                         }
                     }else if(e.getTick() < laneJudgeActiveNoteList[lane].getTick()){
                         // 先に次のノートが判定リストに加えられてしまっていて、後から前のノートが出てきた場合 (visibleNoteListは順番通りになっていないため)
                         laneJudgeActiveNoteList[lane] = e;
+                        laneSoundActiveNoteList[lane] = e;
                     }
                 }
                 //}
@@ -446,11 +448,28 @@ public class NBMPlayer {
                                     //すでに判定された (遅POOR)
                                     setJudge(JUDGE_SLOW_POOR, delay);
                                 }
-                                //data.getSoundDataMap().get(1).stop();
-                                //data.getSoundDataMap().get(1).playAsSoundEffect(1f,1f,false);
                             }
                         }
                     }
+                }
+            }
+
+            for(int lane=0;lane<PLAYLANES;lane++){
+                EventNote e = laneSoundActiveNoteList[lane];
+                if(e != null){
+                    /*if(e instanceof EventLongNote){
+                        if(game.getInputState()[lane] == 2){
+                            data.getSoundDataMap().get(e.getSoundId()).stop();
+                            data.getSoundDataMap().get(e.getSoundId()).playAsSoundEffect(1f,1f,false);
+                        }else if(game.getInputState()[lane] == 1){
+                            data.getSoundDataMap().get(e.getSoundId()).stop();
+                        }
+                    }else{*/
+                    if(game.getInputState()[lane] == 2){
+                        data.getSoundDataMap().get(e.getSoundId()).stop();
+                        data.getSoundDataMap().get(e.getSoundId()).playAsSoundEffect(1f,1f,false);
+                    }
+                    //}
                 }
             }
 
