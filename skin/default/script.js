@@ -3,6 +3,7 @@ var lanepos = [431, 454, 472, 495, 513, 536, 554, 577];
 var Math = Java.type("java.lang.Math");
 var EventNote = Java.type("io.github.suitougreentea.NeoBM.NBM.sequence.EventNote");
 var EventLongNote = Java.type("io.github.suitougreentea.NeoBM.NBM.sequence.EventLongNote");
+var fontTest = new AngelCodeFont(r,"bitmap.fnt");
 
 t = 0;
 
@@ -62,18 +63,18 @@ function drawBeam(array){
 		r.setColor(1,1,1,array[i]);
 		switch(i){
 		case 7:
-			r.drawImage(img2,x,77,36,240,634,80);
+			r.drawImage(img2,x,83,36,240,634,80);
 			break;
 		case 0:
 		case 2:
 		case 4:
 		case 6:
-			r.drawImage(img2,x,77,21,240,672,80);
+			r.drawImage(img2,x,83,21,240,672,80);
 			break;
 		case 1:
 		case 3:
 		case 5:
-			r.drawImage(img2,x,77,16,240,695,80);
+			r.drawImage(img2,x,83,16,240,695,80);
 			break;
 		}
 	}
@@ -123,13 +124,13 @@ function init(){
 function render(){
 	r.drawImage(img,431,0,182,320,624,0);	//playfield
 	
-	drawBeam(s.getPlayer().getKeyBeam());
-	
 	//r.setColor(1, 1, 1, (2 - s.getPlayer().getBeatRate()) * 0.5);
 	r.drawImage(img2,431,308 + (s.getPlayer().getBeatRate() * 6),182,12,446,144);	//beat
 	//r.setColor(1, 1, 1, 1);
 	
 	r.drawImage(img,431,316,182,4,440,322);	//judgeline
+	
+	drawBeam(s.getPlayer().getKeyBeam());
 	
 	for each (var e in s.getPlayer().getActiveNoteList()){
 		if(e instanceof EventLongNote) drawLongNote(e.getLane(), e.getPosition(), e.getEndPosition(), e.isActive());
@@ -142,7 +143,8 @@ function render(){
 	r.drawImage(img,0,0,326,480,328,976);	//movie
 	
 	for(var i=0;i<s.getPlayer().getCalculatedGauge() / 2;i++){
-		r.drawImage(img2,430+4*i,394,4,14,0,115);	//blue gauge
+		//r.drawImage(img2,430+4*i,394,4,14,0,115);	//blue gauge
+		r.drawImage(img2,430+4*i,394,4,14,5,115);	//red gauge
 	}
 	/*for(var i=39;i<50;i++){
 		r.drawImage(img2,430+4*i,394,4,14,5,115);	//red gauge
@@ -155,6 +157,8 @@ function render(){
 	drawInteger(img2, s.getPlayer().getCalculatedGauge(), 421, 374, 119, 99, 190, 16, 0, false);	//gauge
 	drawInteger(img2, 123456, 145, 47, 119, 131, 190, 16, 0, true);	//score
 	drawInteger(img2, 7890, 183, 69, 119, 131, 190, 16, 0, true);	//combo
+	
+	fontTest.drawString("PG: 2000",20,20);
 }
 
 function drawInteger(img, num, dx, dy, sx, sy, sw, sh, padding, format){

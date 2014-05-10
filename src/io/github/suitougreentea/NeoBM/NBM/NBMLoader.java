@@ -59,7 +59,7 @@ class NBMLoaderPrivate {
 
     public NBMLoaderPrivate(String path) throws FileNotFoundException{
         r = new LineNumberReader(new FileReader(path));
-        File file = new File(path);
+        File file = new File(path).getAbsoluteFile();
         parentPath = file.getParent();
     }
 

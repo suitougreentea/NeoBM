@@ -32,6 +32,7 @@ public class SkinManager {
             engine.put("r", r);
             engine.eval("function getPath(s){ return \"skin/default/\"+ s};");
             engine.eval("var Image = Java.type('io.github.suitougreentea.util.Image');");
+            engine.eval("var AngelCodeFont = Java.type('io.github.suitougreentea.NeoBM.player.AngelCodeFont');");
             engine.eval(new FileReader("skin/default/script.js"));
 
             inv.invokeFunction("init");

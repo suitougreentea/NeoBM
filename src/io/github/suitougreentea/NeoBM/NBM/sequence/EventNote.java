@@ -4,6 +4,8 @@ public class EventNote extends Event {
     private int lane, soundId;
     private float position;
 
+    private boolean judged;
+
     public EventNote(int lane, int soundId, long tick) {
         super(tick);
         this.lane = lane;
@@ -25,5 +27,13 @@ public class EventNote extends Event {
 
     public float getPosition(){
         return position;
+    }
+
+    public void setJudged(boolean judged){
+        this.judged = judged;
+    }
+
+    public boolean isJudged(){
+        return judged;
     }
 }
