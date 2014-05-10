@@ -1,7 +1,5 @@
 package io.github.suitougreentea.NeoBM.player;
 
-import java.io.IOException;
-
 import org.lwjgl.Sys;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;

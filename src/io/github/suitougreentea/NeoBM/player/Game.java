@@ -1,9 +1,7 @@
 package io.github.suitougreentea.NeoBM.player;
 
 import io.github.suitougreentea.NeoBM.NeoBM;
-import io.github.suitougreentea.NeoBM.NBM.LoaderThread;
 import io.github.suitougreentea.NeoBM.player.state.StatePlayer;
-import io.github.suitougreentea.util.GLFont;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;

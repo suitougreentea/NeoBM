@@ -16,9 +16,9 @@ public class NBMPlayer {
     String path;
     private LoaderThread loader;
     private NBMData data;
-    private float nowBPM;
-    private int nowBeat;
-    private int nowBaseTick;
+    //private float nowBPM;
+    //private int nowBeat;
+    //private int nowBaseTick;
 
     private long startTime;
 

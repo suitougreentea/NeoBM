@@ -12,10 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -52,9 +48,9 @@ class NBMLoaderPrivate {
     private static final int LEVEL_HEADER = 1;
     private static final int LEVEL_RESOURCE = 2;
     private static final int LEVEL_SEQUENCE = 3;
-    private static final int LEVEL_RANDOM = 4;
-    private static final int LEVEL_IF = 5;
-    private static final int LEVEL_SWITCH = 6;
+    //private static final int LEVEL_RANDOM = 4;
+    //private static final int LEVEL_IF = 5;
+    //private static final int LEVEL_SWITCH = 6;
     private static final int LEVEL_SOUND = 7;
     private static final int LEVEL_IMAGE = 8;
 

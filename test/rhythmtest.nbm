@@ -12,7 +12,7 @@
   resolution:480
   
   judge:@judgerank_easy
-  total:500
+  //total:500
   
 .end
 

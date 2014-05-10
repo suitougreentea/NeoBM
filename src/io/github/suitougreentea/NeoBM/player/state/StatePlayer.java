@@ -1,13 +1,8 @@
 package io.github.suitougreentea.NeoBM.player.state;
 
-import java.io.IOException;
-
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.opengl.TextureImpl;
 
-import io.github.suitougreentea.NeoBM.NBM.LoaderThread;
-import io.github.suitougreentea.NeoBM.NBM.NBMLoader;
-import io.github.suitougreentea.NeoBM.NBM.NBMSyntaxError;
 import io.github.suitougreentea.NeoBM.player.Game;
 import io.github.suitougreentea.NeoBM.player.NBMPlayer;
 import io.github.suitougreentea.NeoBM.player.SkinManager;
@@ -34,7 +29,7 @@ public class StatePlayer {
         skin = new SkinManager(this, game, game.getRenderer());
         skin.init();
 
-        player = new NBMPlayer(game, "test/longnote.nbm");
+        player = new NBMPlayer(game, "test/rhythmtest.nbm");
     }
 
     public void enter(){
