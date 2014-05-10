@@ -3,6 +3,7 @@ package io.github.suitougreentea.NeoBM.NBM;
 import io.github.suitougreentea.NeoBM.NBM.sequence.Event;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventLongNote;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventNote;
+import io.github.suitougreentea.NeoBM.NBM.sequence.EventSound;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventTempo;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventTime;
 
@@ -150,6 +151,13 @@ class NBMLoaderPrivate {
                             if(definedTime && definedTempo){
                                 String[] args = getArgumentsString(array[1], 3);
                                 e = new EventLongNote(getIntegerValue(args[0]), getIntegerValue(args[1]), getIntegerValue(args[2]), tick);
+                            }else{
+                                throw new NBMSyntaxError("Tempo or time event is not defined", r.getLineNumber());
+                            }
+                        }else if(array[0].equals("s")){
+                            if(definedTime && definedTempo){
+                                String[] args = getArgumentsString(array[1], 2);
+                                e = new EventSound(getIntegerValue(args[0]), getIntegerValue(args[1]), tick);
                             }else{
                                 throw new NBMSyntaxError("Tempo or time event is not defined", r.getLineNumber());
                             }

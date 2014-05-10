@@ -181,10 +181,14 @@ public class NBMPlayer {
             tick = speed.getTick(elapsedTime);
 
             // 現在のtickのリアルタイム処理
-            /*while(data.getSequence().get(cursor).getTick() <= tick){
-                //Event e = data.getSequence().get(cursor);
+            while(cursor < data.getSequence().size() && data.getSequence().get(cursor).getTick() <= tick){
+                Event e = data.getSequence().get(cursor);
+                if(e instanceof EventSound){
+                    data.getSoundDataMap().get(((EventSound) e).getSoundId()).stop();
+                    data.getSoundDataMap().get(((EventSound) e).getSoundId()).playAsSoundEffect(1f,1f,false);
+                }
                 cursor++;
-            }*/
+            }
 
             // 予測(PreCursor)
             while(preCursor < data.getSequence().size() && data.getSequence().get(preCursor).getTick() <= tick + ALPHA + 240 /* || JUDGESTART */){
