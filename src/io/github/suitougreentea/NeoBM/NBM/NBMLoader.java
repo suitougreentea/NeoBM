@@ -9,10 +9,12 @@ import io.github.suitougreentea.NeoBM.NBM.sequence.EventTempo;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventTime;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.Stack;
 
@@ -56,7 +58,11 @@ class NBMLoaderPrivate {
     private static final int LEVEL_IMAGE = 8;
 
     public NBMLoaderPrivate(String path) throws FileNotFoundException{
-        r = new LineNumberReader(new FileReader(path));
+        try {
+            r = new LineNumberReader(new InputStreamReader(new FileInputStream(path),"UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         File file = new File(path).getAbsoluteFile();
         parentPath = file.getParent();
     }
