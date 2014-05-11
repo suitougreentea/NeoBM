@@ -7,6 +7,6 @@ public class AppPlayer {
         NeoBM.logger.info(NeoBM.getFullVersion());
         NeoBM.logger.info("Player");
 
-        new Game().start();
+        new Game(args).start();
     }
 }

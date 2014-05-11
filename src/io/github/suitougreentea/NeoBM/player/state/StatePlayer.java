@@ -1,51 +1,47 @@
 package io.github.suitougreentea.NeoBM.player.state;
 
-import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.opengl.TextureImpl;
 
 import io.github.suitougreentea.NeoBM.player.Game;
 import io.github.suitougreentea.NeoBM.player.NBMPlayer;
 import io.github.suitougreentea.NeoBM.player.SkinManager;
-import io.github.suitougreentea.util.GLFont;
 
-public class StatePlayer {
-    private Game game;
+public class StatePlayer extends State {
     private SkinManager skin;
 
     private NBMPlayer player;
 
     public StatePlayer(Game game) {
-        super();
-        this.game = game;
+        super(game);
     }
 
     public NBMPlayer getPlayer() {
         return player;
     }
 
+    @Override
     public void init(){
-
-
         skin = new SkinManager(this, game, game.getRenderer());
         skin.init();
-
-        player = new NBMPlayer(game, "test/backspin.nbm");
     }
 
+    public void initPlayer(String path){
+        player = new NBMPlayer(game, path);
+    }
+
+    @Override
     public void enter(){
 
     }
 
+    @Override
     public void render(){
         skin.render();
         TextureImpl.bindNone();
-        GL11.glTranslatef(50, 50, 0);
-        GLFont.drawString(String.valueOf(player.getTick()));
-        GL11.glTranslatef(-50, -50, 0);
     }
 
+    @Override
     public void update(){
-
         player.eachFrame();
     }
 }

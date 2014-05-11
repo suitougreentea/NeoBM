@@ -3,9 +3,14 @@ var lanepos = [431, 454, 472, 495, 513, 536, 554, 577];
 var Math = Java.type("java.lang.Math");
 var EventNote = Java.type("io.github.suitougreentea.NeoBM.NBM.sequence.EventNote");
 var EventLongNote = Java.type("io.github.suitougreentea.NeoBM.NBM.sequence.EventLongNote");
-var fontTest = new AngelCodeFont(r,"bitmap.fnt");
 
-t = 0;
+function init(){
+	img = new Image(getPath("frame.png"));
+	img2 = new Image(getPath("parts.png"));
+	outlineSmallFont = new AngelCodeFont(r,getPath("bitmap.fnt"));
+}
+
+//t = 0;
 
 // pos: 0-1(float)
 function drawNote(lane, pos){
@@ -36,7 +41,7 @@ function drawLongNote(lane, pos, endpos, active){
 	switch(lane){
 	case 7:
 		r.drawImage(img2,x,starty,36,6,0,7);
-		r.drawImage(img2,x,endy,36,height,0,15,36,1);
+		r.drawImage(img2,x,endy,36,height,0,srcy,36,1);
 		r.drawImage(img2,x,endy,36,6,0,22);
 		break;
 	case 0:
@@ -44,14 +49,14 @@ function drawLongNote(lane, pos, endpos, active){
 	case 4:
 	case 6:
 		r.drawImage(img2,x,starty,21,6,74,7);
-		r.drawImage(img2,x,endy,21,height,74,15,21,1);
+		r.drawImage(img2,x,endy,21,height,74,srcy,21,1);
 		r.drawImage(img2,x,endy,21,6,74,22);
 		break;
 	case 1:
 	case 3:
 	case 5:
 		r.drawImage(img2,x,starty,16,6,96,7);
-		r.drawImage(img2,x,endy,16,height,96,15,16,1);
+		r.drawImage(img2,x,endy,16,height,96,srcy,16,1);
 		r.drawImage(img2,x,endy,16,6,96,22);
 		break;
 	}
@@ -114,11 +119,17 @@ function drawJudge(state, delay, combo){
 		drawInteger(img2, combo, x + 92 + 4 - 1, 235, 413, Math.floor((r.getRenderTime() % 6) / 2) * 36, 220, 34, -2, false);
 		break;
 	}
-}
-
-function init(){
-	img = new Image(getPath("frame.png"));
-	img2 = new Image(getPath("parts.png"));
+	
+	if(delay!=0 && state!=8){
+		if(delay > 0){
+			r.setColor(1,0,0,1);
+			outlineSmallFont.drawString("+" + delay + "ms",500,215);
+		}else{
+			r.setColor(0,0,1,1);
+			outlineSmallFont.drawString(delay + "ms",500,215);
+		}
+		r.setColor(1,1,1,1);
+	}
 }
 
 function render(){
@@ -158,7 +169,7 @@ function render(){
 	drawInteger(img2, 123456, 145, 47, 119, 131, 190, 16, 0, true);	//score
 	drawInteger(img2, 7890, 183, 69, 119, 131, 190, 16, 0, true);	//combo
 	
-	fontTest.drawString("PG: 2000",20,20);
+	//outlineSmallFont.drawString("PG: 2000",20,20);
 }
 
 function drawInteger(img, num, dx, dy, sx, sy, sw, sh, padding, format){

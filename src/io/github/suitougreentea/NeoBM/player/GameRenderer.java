@@ -11,14 +11,11 @@ import io.github.suitougreentea.util.Image;
 import static org.lwjgl.opengl.GL11.*;
 
 public class GameRenderer {
-    private Game game;
-
     private int canvasWidth, canvasHeight;
 
     private float r = 1, g = 1, b = 1, a = 1;
 
-    public GameRenderer(Game game){
-        this.game = game;
+    public GameRenderer(){
     }
 
     public void drawImage(Image image, float dx, float dy){
@@ -64,22 +61,14 @@ public class GameRenderer {
         bindNone();
         GLFont.drawString(NeoBM.getFullVersion());
         glPopMatrix();
+    }
 
+    public void renderFPS(int fps){
         glPushMatrix();
         glTranslatef(1, 16, 0);
         bindNone();
-        GLFont.drawString(String.valueOf(game.getFPS()));
+        GLFont.drawString(String.valueOf(fps));
         glPopMatrix();
-    }
-
-    public void renderTestPoint(){
-        // This is a debug feature
-        GL11.glBegin(GL11.GL_POINTS);
-        GL11.glVertex2f(0, 0);
-        GL11.glVertex2f(639, 0);
-        GL11.glVertex2f(0, 479);
-        GL11.glVertex2f(639, 479);
-        GL11.glEnd();
     }
 
     public void bindNone(){

@@ -18,9 +18,20 @@ public class Game {
     private int calculatingFPS = 0;
     private int fps;
 
+    private String path;
+
     private GameRenderer renderer;
 
     private StatePlayer currentState = new StatePlayer(this);
+
+    public Game(String[] args){
+        if(args.length > 0){
+            path = args[0];
+        }else{
+            NeoBM.logger.fine("args required");
+            System.exit(0);
+        }
+    }
 
     public void start(){
         try {
@@ -33,10 +44,11 @@ public class Game {
             return;
         }
 
-        renderer = new GameRenderer(this);
+        renderer = new GameRenderer();
         renderer.initGL();
 
         currentState.init();    //TODO
+        currentState.initPlayer(path);
 
         lastFrameTime = getTime();
         fpsStartTime = lastFrameTime;
@@ -54,6 +66,7 @@ public class Game {
             currentState.render();
 
             renderer.renderGlobal();
+            renderer.renderFPS(fps);
 
             Display.update();
             if(targetFPS > 0) Display.sync(targetFPS);
