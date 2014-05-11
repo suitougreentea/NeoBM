@@ -12,6 +12,7 @@ import io.github.suitougreentea.NeoBM.NBM.sequence.*;
 
 public class NBMPlayer {
     private Game game;
+    private TimeManager timeManager;
 
     String path;
     private LoaderThread loader;
@@ -158,7 +159,7 @@ public class NBMPlayer {
             }
             cursor++;
         }*/
-        calculateTime(0, 0);
+        timeManager.calculateTime(0, 0);
         startTime = game.getCurrentFrameTime();
     }
 
@@ -174,6 +175,7 @@ public class NBMPlayer {
                 this.data = loader.getResult();
 
                 // initialize
+                timeManager = new TimeManager(data.getSpeedList());
                 chargeNote = (boolean) data.getHeaderMap().get("chargenote");
 
                 int totalNotes = (int) data.getHeaderMap().get("notes");
@@ -187,7 +189,7 @@ public class NBMPlayer {
                 NeoBM.logger.info(String.valueOf(progress));
             }
         }else{
-            NBMSpeedData speed = getFromTime(elapsedTime);
+            NBMSpeedData speed = timeManager.getFromTime(elapsedTime);
             tick = speed.getTick(elapsedTime);
 
             // 現在のtickのリアルタイム処理
@@ -213,7 +215,7 @@ public class NBMPlayer {
             // 可視ノートの位置セット/削除/アクティブに
             for (Iterator<EventNote> i = visibleNoteList.iterator(); i.hasNext();) {
                 EventNote e = i.next();
-                NBMSpeedData s = getFromTick(e.getTick());
+                NBMSpeedData s = timeManager.getFromTick(e.getTick());
                 /*if(s.getTime(e.getTick()) + J_BD < elapsedTime){
                     //i.remove();
                 }else{*/
@@ -290,12 +292,12 @@ public class NBMPlayer {
             for(int lane=0;lane<PLAYLANES;lane++){
                 EventNote e = laneJudgeActiveNoteList[lane];
                 if(e != null){
-                    NBMSpeedData s = getFromTick(e.getTick());
+                    NBMSpeedData s = timeManager.getFromTick(e.getTick());
 
                     if(e instanceof EventLongNote){
                         // ロングノート
                         long endTick = e.getTick() + ((EventLongNote) e).getGate();
-                        NBMSpeedData es = getFromTick(endTick);
+                        NBMSpeedData es = timeManager.getFromTick(endTick);
 
                         if(e instanceof EventLongNoteBackSpin){
                             // いわゆるBSS (終端に入力、キー音)
@@ -342,7 +344,6 @@ public class NBMPlayer {
                             }else if(!e.isJudged()){
                                 if(game.getInputState()[lane] == 2){
                                     int delay = Math.round(elapsedTime - s.getTime(e.getTick()));
-                                    System.out.println(String.format("%d", delay));
                                     //まだノートが判定されていない
                                     if(delay < -J_BD){
                                         //早POOR
@@ -412,7 +413,6 @@ public class NBMPlayer {
                                     }else if(!e.isJudged()){
                                         if(game.getInputState()[lane] == 2){
                                             int delay = Math.round(elapsedTime - s.getTime(e.getTick()));
-                                            System.out.println(String.format("%d", delay));
                                             //まだノートが判定されていない
                                             if(delay < -J_BD){
                                                 //早POOR
@@ -484,7 +484,6 @@ public class NBMPlayer {
                                     }else if(!e.isJudged()){
                                         if(game.getInputState()[lane] == 2){
                                             int delay = Math.round(elapsedTime - s.getTime(e.getTick()));
-                                            System.out.println(String.format("%d", delay));
                                             //まだノートが判定されていない
                                             if(delay < -J_BD){
                                                 //早POOR
@@ -529,13 +528,10 @@ public class NBMPlayer {
                             laneJudgeActiveNoteList[lane] = null;
                             /*}else if(s.getTime(e.getTick()) + J_BD < elapsedTime && !visibleNoteList.contains(e) && (laneLastJudge[lane] < -J_GD || J_GD < laneLastJudge[lane])){
                             // 遅POORエリアにおいて、そのノートの判定がBADだった場合
-                            System.out.println("called");
                             laneJudgeActiveNoteList[lane] = null; */
                         }else{
-                            //System.out.println(game.getInputState()[lane]);
                             if(game.getInputState()[lane] == 2){
                                 int delay = Math.round(elapsedTime - s.getTime(e.getTick()));
-                                System.out.println(String.format("%d", delay));
                                 if(!e.isJudged()){
                                     //まだノートが判定されていない
                                     if(delay < -J_BD){
@@ -570,7 +566,7 @@ public class NBMPlayer {
             if(showJudgeTimer != 0) showJudgeTimer += game.getDelta();
             if(showJudgeTimer > 1000) showJudgeTimer = 0;
 
-            beatRate = getBeatRate((long) tick);
+            beatRate = timeManager.getBeatRate((long) tick);
         }
 
         for(int i=0;i<PLAYLANES;i++){
@@ -579,8 +575,6 @@ public class NBMPlayer {
             if(keyBeam[i] > 1f) keyBeam[i] = 1f;
             else if(keyBeam[i] < 0f) keyBeam[i] = 0f;
         }
-
-        //System.out.println(String.format("%.10f",tick));
     }
 
     public float getTick(){
@@ -592,48 +586,5 @@ public class NBMPlayer {
     }
     public Set<EventNote> getActiveNoteList(){
         return visibleNoteList;
-    }
-
-    // data.speedList周り
-
-    public NBMSpeedData getFromTime(long time){
-        int i = 0;
-        while(i < data.getSpeedList().size() - 1){
-            if(data.getSpeedList().get(i + 1).getEventTime() < time) i++;
-            else break;
-        }
-        return data.getSpeedList().get(i);
-    }
-
-    public NBMSpeedData getFromTick(long tick){
-        int i = 0;
-        while(i < data.getSpeedList().size() - 1){
-            if(data.getSpeedList().get(i + 1).getEventTick() < tick) i++;
-            else break;
-        }
-        return data.getSpeedList().get(i);
-    }
-
-    public void calculateTime(long nowTime, long nowTick){
-        long tick = nowTick;
-        long time = nowTime;
-        int i = 0;
-        while(i < data.getSpeedList().size() - 1){
-            //System.out.println(data.getSpeedList().get(i).getTime());
-            data.getSpeedList().get(i + 1).setEventTime(Math.round(time + (data.getSpeedList().get(i + 1).getEventTick() - tick) * data.getSpeedList().get(i).getMilliSecondPerTick()));
-            i++;
-            tick = data.getSpeedList().get(i).getEventTick();
-            time = data.getSpeedList().get(i).getEventTime();
-        }
-    }
-
-    public float getBeatRate(long tick){
-        int i = 0;
-        while(i < data.getSpeedList().size() - 1){
-            if(data.getSpeedList().get(i + 1).getEventTick() < tick) i++;
-            else break;
-        }
-        NBMSpeedData speed = data.getSpeedList().get(i);
-        return ((tick - speed.getEventTick()) % speed.getBaseTick()) / ((float)(speed.getBaseTick()));
     }
 }

@@ -4,10 +4,19 @@ var Math = Java.type("java.lang.Math");
 var EventNote = Java.type("io.github.suitougreentea.NeoBM.NBM.sequence.EventNote");
 var EventLongNote = Java.type("io.github.suitougreentea.NeoBM.NBM.sequence.EventLongNote");
 
+var DigitFont = Java.type("io.github.suitougreentea.NeoBM.player.DigitFont");
+
 function init(){
 	img = new Image(getPath("frame.png"));
 	img2 = new Image(getPath("parts.png"));
 	outlineSmallFont = new AngelCodeFont(r,getPath("bitmap.fnt"));
+	gaugeFont = new DigitFont(r,img2,100,100,19,16,19,0);
+	scoreFont = new DigitFont(r,img2,100,132,19,16,19,0);
+	
+	comboFont = [];
+	for(var i=0;i<4;i++){
+		comboFont[i] = new DigitFont(r,img2,414,i*36,22,34,20,0);
+	}
 }
 
 //t = 0;
@@ -103,20 +112,20 @@ function drawJudge(state, delay, combo){
 		var x = 431 + (182 - (74 + 4 + cs.length * 20)) / 2;
 		if(r.getRenderTime() % 3 < 2){
 			r.drawImage(img2,x,235,74,34,320,144);
-			drawInteger(img2, combo, x + 74 + 4 - 1, 235, 413, 108, 220, 34, -2, false);
+			comboFont[3].drawString(combo, x + 74 + 4 - 1, 235);
 		}
 		break;
 	case 7:	//GREAT
 		var x = 431 + (182 - (92 + 4 + cs.length * 20)) / 2;
 		if(r.getRenderTime() % 3 < 2){
 			r.drawImage(img2,x,235,92,34,320,108);
-			drawInteger(img2, combo, x + 92 + 4 - 1, 235, 413, 108, 220, 34, -2, false);
+			comboFont[3].drawString(combo, x + 92 + 4 - 1, 235);
 		}
 		break;
 	case 8:	//PGREAT
 		var x = 431 + (182 - (92 + 4 + cs.length * 20)) / 2;
 		r.drawImage(img2,x,235,92,34,320,Math.floor((r.getRenderTime() % 6) / 2) * 36);
-		drawInteger(img2, combo, x + 92 + 4 - 1, 235, 413, Math.floor((r.getRenderTime() % 6) / 2) * 36, 220, 34, -2, false);
+		comboFont[Math.floor((r.getRenderTime() % 6) / 2)].drawString(combo, x + 92 + 4 - 1, 235);
 		break;
 	}
 	
@@ -165,17 +174,24 @@ function render(){
 	
 	//drawNote(0,1);
 	
-	drawInteger(img2, s.getPlayer().getCalculatedGauge(), 421, 374, 119, 99, 190, 16, 0, false);	//gauge
-	drawInteger(img2, 123456, 145, 47, 119, 131, 190, 16, 0, true);	//score
-	drawInteger(img2, 7890, 183, 69, 119, 131, 190, 16, 0, true);	//combo
+	gaugeFont.drawStringRight(s.getPlayer().getCalculatedGauge(), 477, 374);	//gauge
+	r.drawImage(img2, 479,382,7,7,310,108);	//%
+	scoreFont.drawString(paddingLeft(0,' ',6), 145, 47);	//score
+	scoreFont.drawString(paddingLeft(0,' ',4), 183, 69);	//combo
 	
-	//outlineSmallFont.drawString("PG: 2000",20,20);
+	r.setColor(1,1,1,0.9);
+	r.drawImage(img2,261,376,61,98,400,160);
+	r.setColor(1,1,1,1);
+	outlineSmallFont.drawString("PG:    0",261+3,376+7);
+	outlineSmallFont.drawString("GR:    0",261+3,376+20);
+	outlineSmallFont.drawString("GD:    0",261+3,376+33);
+	outlineSmallFont.drawString("BD:    0",261+3,376+46);
+	outlineSmallFont.drawString("PR:    0",261+3,376+59);
+	outlineSmallFont.drawString("CB:    0",261+3,376+72);
 }
 
-function drawInteger(img, num, dx, dy, sx, sy, sw, sh, padding, format){
-	var n = String(num);//.split('');
-	var cw = sw / 10;
-	for(var i=0;i<n.length;i++){
-		r.drawImage(img, dx+i*(cw+padding), dy, cw, sh, sx+(n.charCodeAt(i)-48)*cw, sy);
-	}
+function paddingLeft(val,char,n){
+	var leftval = "";
+	for(;leftval.length < n;leftval+=char);
+	return (leftval+val).slice(-n);
 }

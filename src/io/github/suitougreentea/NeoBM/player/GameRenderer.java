@@ -1,5 +1,7 @@
 package io.github.suitougreentea.NeoBM.player;
 
+import java.io.IOException;
+
 import org.lwjgl.Sys;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -12,10 +14,16 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class GameRenderer {
     private int canvasWidth, canvasHeight;
+    private AngelCodeFont font;
 
     private float r = 1, g = 1, b = 1, a = 1;
 
     public GameRenderer(){
+        try {
+            font = new AngelCodeFont(this, "res/font.fnt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void drawImage(Image image, float dx, float dy){
@@ -56,19 +64,11 @@ public class GameRenderer {
     }
 
     public void renderGlobal(){
-        glPushMatrix();
-        glTranslatef(1, 1, 0);
-        bindNone();
-        GLFont.drawString(NeoBM.getFullVersion());
-        glPopMatrix();
+        font.drawString(NeoBM.getFullVersion(),0,0);
     }
 
     public void renderFPS(int fps){
-        glPushMatrix();
-        glTranslatef(1, 16, 0);
-        bindNone();
         GLFont.drawString(String.valueOf(fps));
-        glPopMatrix();
     }
 
     public void bindNone(){
