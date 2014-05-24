@@ -78,15 +78,11 @@ NBM Format Specification
     * n ({lane},{soundid}) : ノート
         * lane (Integer) : ノートのレーンを表します。
         * soundid (Integer) : リソース部で宣言された音声ファイルのIDで、鳴らすキー音を指定します。
-    * l ({lane},{soundid},{gate}) : ロングノート
-        * lane (Integer) : `n`と同様
-        * soundid (Integer) : `n`と同様
-        * gate (Integer) : ノートの長さ
-    * lb ({lane},{soundid},{endsoundid},{gate}) : 終端にキー音があるロングノート
+    * l ({lane},{soundid},{endsoundid},{gate}) : ロングノート
         * lane (Integer) : `n`と同様
         * soundid (Integer) : `n`と同様
         * endsoundid (Integer) : 終端のキー音
-        * gate (Integer) : `l`と同様
+        * gate (Integer) : ノートの長さ
     * n ({lane},{soundid}) : バックグラウンドで再生される音
         * lane (Integer) : エディタにおけるイベントの表示位置
         * soundid (Integer) : `n`と同様

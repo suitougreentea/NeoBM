@@ -153,8 +153,12 @@ function render(){
 	drawBeam(s.getPlayer().getKeyBeam());
 	
 	for each (var e in s.getPlayer().getActiveNoteList()){
-		if(e instanceof EventLongNote) drawLongNote(e.getLane(), e.getPosition(), e.getEndPosition(), e.isActive());
-		else drawNote(e.getLane(), e.getPosition());
+		var position = s.getPlayer().getNotePosition(e);
+		if(e instanceof EventLongNote){
+			var endPosition = s.getPlayer().getNoteEndPosition(e);
+			drawLongNote(e.getLane(), position, endPosition, e.isActive());
+		}
+		else drawNote(e.getLane(), position);
 	}
 	
 	r.drawImage(img,422,0,218,480,220,0);	//playframe
@@ -171,8 +175,6 @@ function render(){
 	}*/
 	
 	if(s.getPlayer().getShowJudgeTimer() != 0) drawJudge(s.getPlayer().getLastJudgeState(), s.getPlayer().getLastJudgeDelay(), s.getPlayer().getCombo());
-	
-	//drawNote(0,1);
 	
 	gaugeFont.drawStringRight(s.getPlayer().getCalculatedGauge(), 477, 374);	//gauge
 	r.drawImage(img2, 479,382,7,7,310,108);	//%

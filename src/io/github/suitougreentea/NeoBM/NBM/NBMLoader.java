@@ -2,7 +2,6 @@ package io.github.suitougreentea.NeoBM.NBM;
 
 import io.github.suitougreentea.NeoBM.NBM.sequence.Event;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventLongNote;
-import io.github.suitougreentea.NeoBM.NBM.sequence.EventLongNoteBackSpin;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventNote;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventSound;
 import io.github.suitougreentea.NeoBM.NBM.sequence.EventTempo;
@@ -161,18 +160,10 @@ class NBMLoaderPrivate {
                             }
                         }else if(array[0].equals("l")){
                             if(definedTime && definedTempo){
-                                String[] args = getArgumentsString(array[1], 3);
-                                e = new EventLongNote(getIntegerValue(args[0]), getIntegerValue(args[1]), getIntegerValue(args[2]), tick);
+                                String[] args = getArgumentsString(array[1], 4);
+                                e = new EventLongNote(getIntegerValue(args[0]), getIntegerValue(args[1]), getIntegerValue(args[2]), getIntegerValue(args[3]), tick);
                                 totalNotes++;
                                 if(chargeNote) totalNotes++;
-                            }else{
-                                throw new NBMSyntaxError("Tempo or time event is not defined", r.getLineNumber());
-                            }
-                        }else if(array[0].equals("lb")){
-                            if(definedTime && definedTempo){
-                                String[] args = getArgumentsString(array[1], 4);
-                                e = new EventLongNoteBackSpin(getIntegerValue(args[0]), getIntegerValue(args[1]), getIntegerValue(args[2]), getIntegerValue(args[3]), tick);
-                                totalNotes += 2;
                             }else{
                                 throw new NBMSyntaxError("Tempo or time event is not defined", r.getLineNumber());
                             }
@@ -262,12 +253,12 @@ class NBMLoaderPrivate {
     }
 
     public int getIntegerValue(String data) throws NBMSyntaxError {
-        if(!data.matches("([1-9][0-9]*|0)")) throw new NBMSyntaxError("Property must be integer", r.getLineNumber());
+        if(!data.matches("-?([1-9][0-9]*|0)")) throw new NBMSyntaxError("Property must be integer", r.getLineNumber());
         return Integer.valueOf(data);
     }
 
     public float getFloatValue(String data) throws NBMSyntaxError {
-        if(!data.matches("([1-9][0-9]*|0)(\\.?[0-9]+)?")) throw new NBMSyntaxError("Property must be number", r.getLineNumber());
+        if(!data.matches("-?([1-9][0-9]*|0)(\\.?[0-9]+)?")) throw new NBMSyntaxError("Property must be number", r.getLineNumber());
         return Float.valueOf(data);
     }
 

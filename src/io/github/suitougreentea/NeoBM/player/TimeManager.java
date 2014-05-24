@@ -11,7 +11,7 @@ public class TimeManager {
         this.list = list;
     }
 
-    public NBMSpeedData getFromTime(long time){
+    public NBMSpeedData getSpeedDataFromTime(long time){
         int i = 0;
         while(i < list.size() - 1){
             if(list.get(i + 1).getEventTime() < time) i++;
@@ -20,13 +20,21 @@ public class TimeManager {
         return list.get(i);
     }
 
-    public NBMSpeedData getFromTick(long tick){
+    public NBMSpeedData getSpeedDataFromTick(long tick){
         int i = 0;
         while(i < list.size() - 1){
             if(list.get(i + 1).getEventTick() < tick) i++;
             else break;
         }
         return list.get(i);
+    }
+
+    public float getTimeFromTick(long tick){
+        return getSpeedDataFromTick(tick).getTime(tick);
+    }
+
+    public float getTickFromTime(long time){
+        return getSpeedDataFromTick(time).getTick(time);
     }
 
     public void calculateTime(long nowTime, long nowTick){
